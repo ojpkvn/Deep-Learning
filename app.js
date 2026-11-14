@@ -50,10 +50,24 @@
         return;
       } catch (e) { console.error(backend, e); lastErr = e; }
     }
-    const raw = String((lastErr && lastErr.message) || lastErr || 'unknown error');
+    let raw = String((lastErr && lastErr.message) || lastErr || 'unknown error');
+    // Check each model file's size on the website against the correct size and name the bad one.
+    if (!/404/.test(raw)) {
+      const EXPECTED = { 'group1-shard1of4.bin': 4194304, 'group1-shard2of4.bin': 4194304, 'group1-shard3of4.bin': 4194304, 'group1-shard4of4.bin': 3420296 };
+      const bad = [];
+      for (const f of Object.keys(EXPECTED)) {
+        try {
+          const r = await fetch(f + '?check=' + Date.now(), { cache: 'reload' });
+          const n = r.ok ? (await r.arrayBuffer()).byteLength : 'HTTP ' + r.status;
+          if (n !== EXPECTED[f]) bad.push(f + ' is ' + n + ' bytes (should be ' + EXPECTED[f] + ')');
+        } catch (e) { bad.push(f + ' could not be fetched'); }
+      }
+      if (bad.length) raw = 'bad file on the website: ' + bad.join('; ') + '. Re-upload it';
+      else raw = raw + ' (files on the site look correct, so try Reset)';
+    }
     const why = /404/.test(raw)
       ? 'model.json or a .bin file is missing from the website'
-      : raw.slice(0, 110);
+      : raw.slice(0, 400);
     setStatus('Could not load the model (' + why + '). Tap here to reset and reload.', 'error');
     $('status').style.cursor = 'pointer';
     $('status').addEventListener('click', resetAppData, { once: true });
