@@ -1,10 +1,10 @@
 /* Service worker: caches the app and the model so it works with no internet after the first visit. */
-const CACHE = 'noodle-classifier-v5';
+const CACHE = 'noodle-classifier-v6';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'app.js', 'classifier.js', 'nutrition.js', 'log.js', 'tf.min.js', 'manifest.webmanifest',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
-  'model/model.json',
-  'model/group1-shard1of4.bin', 'model/group1-shard2of4.bin', 'model/group1-shard3of4.bin', 'model/group1-shard4of4.bin'
+  'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
+  'model.json',
+  'group1-shard1of4.bin', 'group1-shard2of4.bin', 'group1-shard3of4.bin', 'group1-shard4of4.bin'
 ];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

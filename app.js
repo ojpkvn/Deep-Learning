@@ -22,7 +22,7 @@
     catch (e) { await tf.setBackend('cpu'); await tf.ready(); }
   }
   async function offlineReady() {
-    try { return !!(await caches.match('model/model.json')); } catch (e) { return false; }
+    try { return !!(await caches.match('model.json')); } catch (e) { return false; }
   }
   async function resetAppData() {
     setStatus('Resetting saved app files…');
@@ -41,7 +41,7 @@
       try {
         try { await tf.setBackend(backend); await tf.ready(); }
         catch (e) { if (backend === 'cpu') throw e; continue; }
-        model = await Classifier.loadModel('model/model.json');
+        model = await Classifier.loadModel('model.json');
         $('btnCamera').disabled = false; $('btnLibrary').disabled = false;
         setStatus((await offlineReady()) ? 'Ready · works offline' : 'Ready · saving for offline use…', 'ready');
         if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(async () => {
@@ -50,7 +50,10 @@
         return;
       } catch (e) { console.error(backend, e); lastErr = e; }
     }
-    const why = String((lastErr && lastErr.message) || lastErr || 'unknown error').slice(0, 110);
+    const raw = String((lastErr && lastErr.message) || lastErr || 'unknown error');
+    const why = /404/.test(raw)
+      ? 'model.json or a .bin file is missing from the website'
+      : raw.slice(0, 110);
     setStatus('Could not load the model (' + why + '). Tap here to reset and reload.', 'error');
     $('status').style.cursor = 'pointer';
     $('status').addEventListener('click', resetAppData, { once: true });
