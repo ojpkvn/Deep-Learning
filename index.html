@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Noodle Log</title>
+<meta name="theme-color" content="#fbf4e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b130e" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Noodle Log">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <header class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h24a12 12 0 0 1-24 0Z" fill="currentColor" fill-opacity=".18"/><path d="M9 15c0-3 2-3 2-6M15 15c0-3 2-3 2-6M21 15c0-3 2-3 2-6" opacity=".9"/><path d="M20 4l7 8" /><path d="M23 3l6 7"/></svg>
+    </span>
+    <h1>Noodle Log</h1>
+  </header>
+  <p class="sub">Snap a bowl of <b>laksa</b>, <b>mee goreng</b>, <b>pho</b> or <b>ramen</b> and the app suggests a calorie and sodium entry for your daily log.</p>
+
+  <div id="status" class="status"><span class="dot"></span><span id="statusText">Starting…</span></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabScan" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/></svg>Scan</button>
+    <button class="tab" id="tabLog" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Log<span class="badge" id="badge" hidden>0</span></button>
+  </div>
+
+  <!-- SCAN -->
+  <section id="viewScan">
+    <div class="actions">
+      <button id="btnCamera" class="btn primary" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></svg>Take photo</button>
+      <button id="btnLibrary" class="btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.7"/><path d="m21 16-5-5-8 9"/></svg>Choose photo</button>
+    </div>
+    <input id="inCamera" type="file" accept="image/*" capture="environment">
+    <input id="inLibrary" type="file" accept="image/*">
+
+    <section class="card" aria-live="polite">
+      <img id="preview" alt="Your photo">
+      <div id="empty" class="empty"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18a9 9 0 0 1-18 0Z"/><path d="M8 12c0-2.5 1.5-2.5 1.5-5M12 12c0-2.5 1.5-2.5 1.5-5M16 12c0-2.5 1.5-2.5 1.5-5"/></svg>No photo yet.<br>Pick one above to see a prediction.</div>
+      <div id="result">
+        <div class="top"><span class="name" id="topName"></span><span class="pct" id="topPct"></span></div>
+        <p class="hint" id="hint"></p>
+        <div id="bars"></div>
+      </div>
+    </section>
+
+    <section class="card pad" id="entry">
+      <h2>Suggested log entry</h2>
+      <span class="label first">Dish (tap to change)</span>
+      <div class="seg c4" id="dishChips"></div>
+      <span class="label">Portion</span>
+      <div class="seg c3" id="portionChips"></div>
+      <div class="fields">
+        <div class="field"><label class="label" for="fKcal">Calories</label><input id="fKcal" type="number" inputmode="numeric" min="0" step="5"><small>kcal</small></div>
+        <div class="field"><label class="label" for="fSodium">Sodium</label><input id="fSodium" type="number" inputmode="numeric" min="0" step="10"><small>mg</small></div>
+      </div>
+      <span class="label">Meal</span>
+      <div class="field"><select id="fMeal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div>
+      <p class="share" id="share"></p>
+      <p class="note" id="entryNote"></p>
+      <button id="addBtn" class="btn primary">Add to today’s log</button>
+    </section>
+  </section>
+
+  <!-- LOG -->
+  <section id="viewLog" hidden>
+    <div id="storageWarn" class="warnbox" hidden>This browser is not saving data, so your log will be lost when you close the app. Use “Export CSV” to keep a copy.</div>
+    <div class="daynav">
+      <button id="prevDay" aria-label="Previous day">‹</button>
+      <div class="day" id="dayLabel"></div>
+      <button id="nextDay" aria-label="Next day">›</button>
+    </div>
+    <section class="card pad" id="meters"></section>
+    <section class="card" id="items"></section>
+    <details class="card">
+      <summary>Daily targets</summary>
+      <div class="inner">
+        <div class="targets">
+          <div class="field"><label class="label" for="tKcal">Calories (kcal)</label><input id="tKcal" type="number" inputmode="numeric" min="1"></div>
+          <div class="field"><label class="label" for="tSodium">Sodium (mg)</label><input id="tSodium" type="number" inputmode="numeric" min="1"></div>
+        </div>
+        <p class="note">The default sodium target is 2,000 mg a day, the common WHO / Singapore HPB guideline. Set the numbers your own doctor or dietitian gave you if they differ.</p>
+      </div>
+    </details>
+    <button id="exportBtn" class="btn block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>Export CSV</button>
+  </section>
+
+  <p class="foot">Everything runs on your phone: your photos are never uploaded, and the log stays in this app’s storage. The model only knows these four dishes, so it always picks one of them, and a high percentage does not guarantee it is right. Calorie and sodium figures are estimates for a typical serving, not measurements; real bowls vary a lot, especially in sodium (the broth and sauce hold most of it). This is a tracking aid, not medical advice.</p>
+</main>
+
+<script src="tf.min.js"></script>
+<script src="classifier.js"></script>
+<script src="nutrition.js"></script>
+<script src="log.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
