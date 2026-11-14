@@ -51,23 +51,25 @@
       } catch (e) { console.error(backend, e); lastErr = e; }
     }
     let raw = String((lastErr && lastErr.message) || lastErr || 'unknown error');
-    // Check each model file's size on the website against the correct size and name the bad one.
+    // Compare a fingerprint of each model file on the website with the correct one, and say which differs.
     if (!/404/.test(raw)) {
-      const EXPECTED = { 'group1-shard1of4.bin': 4194304, 'group1-shard2of4.bin': 4194304, 'group1-shard3of4.bin': 4194304, 'group1-shard4of4.bin': 3420296 };
-      const bad = [];
-      for (const f of Object.keys(EXPECTED)) {
+      const GOOD = {"model.json": "a8708883456e", "group1-shard1of4.bin": "2d70797f5397", "group1-shard2of4.bin": "3e6bfcf4faea", "group1-shard3of4.bin": "0ed1878a3e40", "group1-shard4of4.bin": "d8ed169a0d81"};
+      const hex = (buf) => Array.from(new Uint8Array(buf)).map((x) => x.toString(16).padStart(2, '0')).join('');
+      const out = [];
+      for (const f of Object.keys(GOOD)) {
         try {
           const r = await fetch(f + '?check=' + Date.now(), { cache: 'reload' });
-          const n = r.ok ? (await r.arrayBuffer()).byteLength : 'HTTP ' + r.status;
-          if (n !== EXPECTED[f]) bad.push(f + ' is ' + n + ' bytes (should be ' + EXPECTED[f] + ')');
-        } catch (e) { bad.push(f + ' could not be fetched'); }
+          if (!r.ok) { out.push(f + ': HTTP ' + r.status); continue; }
+          const buf = await r.arrayBuffer();
+          const h = hex(await crypto.subtle.digest('SHA-256', buf)).slice(0, 12);
+          out.push(f.replace('group1-shard', 's').replace('.bin', '') + (h === GOOD[f] ? ' ok' : ' DIFFERENT(' + buf.byteLength + 'B)'));
+        } catch (e) { out.push(f + ': ' + e.message); }
       }
-      if (bad.length) raw = 'bad file on the website: ' + bad.join('; ') + '. Re-upload it';
-      else raw = raw + ' (files on the site look correct, so try Reset)';
+      raw = out.join(', ');
     }
     const why = /404/.test(raw)
       ? 'model.json or a .bin file is missing from the website'
-      : raw.slice(0, 400);
+      : raw.slice(0, 600);
     setStatus('Could not load the model (' + why + '). Tap here to reset and reload.', 'error');
     $('status').style.cursor = 'pointer';
     $('status').addEventListener('click', resetAppData, { once: true });
