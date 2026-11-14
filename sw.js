@@ -1,5 +1,5 @@
 /* Service worker: caches the app and the model so it works with no internet after the first visit. */
-const CACHE = 'noodle-classifier-v7';
+const CACHE = 'noodle-classifier-v8';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'app.js', 'classifier.js', 'nutrition.js', 'log.js', 'tf.min.js', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
